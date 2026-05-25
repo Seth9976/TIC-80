@@ -5,21 +5,25 @@ on:
   push:  
     branches: [ "master", "main" ]  
   
+env:  
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # 解决 Node.js 20 弃用警告  
+  
 jobs:  
   html-pro:  
-    runs-on: ubuntu-latest  
+    runs-on: ubuntu-22.04   # 明确指定，避免 ubuntu-latest 漂移到 Windows  
   
     steps:  
-      - uses: emscripten-core/setup-emsdk@v14   # 修正：v15 不存在  
-  
-      - uses: actions/checkout@v4                # 修正：v6 不存在  
+      # checkout 必须在 setup-emsdk 之前，确保 build/ 目录存在  
+      - uses: actions/checkout@v4  
         with:  
           submodules: recursive  
           fetch-depth: 0  
   
+      - uses: emscripten-core/setup-emsdk@v14   # 修正：v15 不存在  
+  
       - uses: ruby/setup-ruby@v1  
         with:  
-          ruby-version: "3.2"                    # 修正：2.6 已 EOL  
+          ruby-version: "3.2"  
   
       - name: Build lua (Pro)  
         run: |  
@@ -93,7 +97,6 @@ jobs:
           emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_PYTHON=ON -DTIC80_TARGET=tic80python .. --fresh  
           cmake --build . --parallel  
   
-      # 最终完整版：包含所有语言 + Pro  
       - name: Build all (Pro)  
         run: |  
           cd build  
@@ -102,7 +105,7 @@ jobs:
           cp html/index.html bin/index.html  
   
       - name: Upload artifact  
-        uses: actions/upload-artifact@v4          # 修正：v6 不存在  
+        uses: actions/upload-artifact@v4  
         with:  
           name: "tic80-html-pro"  
           path: build/bin/*
