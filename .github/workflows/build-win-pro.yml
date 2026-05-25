@@ -5,9 +5,12 @@ on:
   push:  
     branches: [ "master", "main" ]  
   
+env:  
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # 解决 Node.js 20 弃用警告  
+  
 jobs:  
   windows-pro:  
-    runs-on: windows-latest        # 改这里，可用性更好  
+    runs-on: windows-2022  
   
     steps:  
       - uses: actions/checkout@v4  
@@ -17,13 +20,14 @@ jobs:
   
       - uses: ruby/setup-ruby@v1  
         with:  
-          ruby-version: "2.6"  
+          ruby-version: "3.2"  
   
       - name: Build Pro  
         shell: cmd  
         run: |  
-          cd build  
-          cmake -G "Visual Studio 16 2019" -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_PRO=On -DBUILD_WITH_ALL=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..  
+          mkdir build_pro  
+          cd build_pro  
+          cmake -G "Visual Studio 17 2022" -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_PRO=On -DBUILD_WITH_ALL=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..  
           cmake --build . --config MinSizeRel --parallel  
   
       - name: Upload artifact  
@@ -31,5 +35,5 @@ jobs:
         with:  
           name: "tic80-windows-pro"  
           path: |  
-            build/bin/tic80.exe  
-            build/bin/*.dll
+            build_pro/bin/tic80.exe  
+            build_pro/bin/*.dll
