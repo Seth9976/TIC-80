@@ -1,0 +1,108 @@
+name: Build HTML Pro  
+  
+on:  
+  workflow_dispatch:  
+  push:  
+    branches: [ "master", "main" ]  
+  
+jobs:  
+  html-pro:  
+    runs-on: ubuntu-latest  
+  
+    steps:  
+      - uses: emscripten-core/setup-emsdk@v14   # 修正：v15 不存在  
+  
+      - uses: actions/checkout@v4                # 修正：v6 不存在  
+        with:  
+          submodules: recursive  
+          fetch-depth: 0  
+  
+      - uses: ruby/setup-ruby@v1  
+        with:  
+          ruby-version: "3.2"                    # 修正：2.6 已 EOL  
+  
+      - name: Build lua (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=ON -DTIC80_TARGET=tic80lua .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build ruby (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_RUBY=ON -DTIC80_TARGET=tic80ruby .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build js (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_JS=ON -DTIC80_TARGET=tic80js .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build moon (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_MOON=ON -DTIC80_TARGET=tic80moon .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build yue (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_YUE=ON -DTIC80_TARGET=tic80yue .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build fennel (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_FENNEL=ON -DTIC80_TARGET=tic80fennel .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build scheme (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_SCHEME=ON -DTIC80_TARGET=tic80scheme .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build squirrel (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_SQUIRREL=ON -DTIC80_TARGET=tic80squirrel .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build wren (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_WREN=ON -DTIC80_TARGET=tic80wren .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build wasm (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_WASM=ON -DTIC80_TARGET=tic80wasm .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build janet (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_JANET=ON -DTIC80_TARGET=tic80janet .. --fresh  
+          cmake --build . --parallel  
+  
+      - name: Build python (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_LUA=OFF -DBUILD_WITH_PYTHON=ON -DTIC80_TARGET=tic80python .. --fresh  
+          cmake --build . --parallel  
+  
+      # 最终完整版：包含所有语言 + Pro  
+      - name: Build all (Pro)  
+        run: |  
+          cd build  
+          emcmake cmake -DBUILD_SDLGPU=On -DBUILD_STATIC=ON -DCMAKE_BUILD_TYPE=Release -DBUILD_PRO=On -DBUILD_WITH_ALL=ON .. --fresh  
+          cmake --build . --parallel  
+          cp html/index.html bin/index.html  
+  
+      - name: Upload artifact  
+        uses: actions/upload-artifact@v4          # 修正：v6 不存在  
+        with:  
+          name: "tic80-html-pro"  
+          path: build/bin/*
