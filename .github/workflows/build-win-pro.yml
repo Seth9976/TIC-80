@@ -7,7 +7,7 @@ on:
   
 jobs:  
   windows-pro:  
-    runs-on: windows-2019  
+    runs-on: windows-latest        # 改这里，可用性更好  
   
     steps:  
       - uses: actions/checkout@v4  
@@ -18,10 +18,6 @@ jobs:
       - uses: ruby/setup-ruby@v1  
         with:  
           ruby-version: "2.6"  
-  
-      - name: Create build directory  
-        shell: cmd  
-        run: mkdir build  
   
       - name: Build Pro  
         shell: cmd  
