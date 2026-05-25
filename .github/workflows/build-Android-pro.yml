@@ -1,0 +1,53 @@
+name: Build Android Pro  
+  
+on:  
+  workflow_dispatch:  
+  push:  
+    branches: [ "master", "main" ]  
+  
+jobs:  
+  android-pro:  
+    runs-on: ubuntu-latest  
+  
+    steps:  
+      - uses: actions/checkout@v4        # 修正：v6 不存在  
+        with:  
+          submodules: recursive  
+          fetch-depth: 0  
+  
+      - uses: nttld/setup-ndk@v1  
+        id: setup-ndk  
+        with:  
+          ndk-version: r23               # 与 app/build.gradle 中 ndkVersion 一致  
+          add-to-path: false  
+          local-cache: true  
+  
+      - name: Set up JDK 17  
+        uses: actions/setup-java@v4      # 修正：v5 可用，v4 也可  
+        with:  
+          java-version: '17'  
+          distribution: 'temurin'  
+          cache: gradle  
+  
+      # 关键步骤：将硬编码的 OFF 改为 ON  
+      - name: Patch build.gradle for Pro  
+        run: |  
+          sed -i 's/-DBUILD_PRO=OFF/-DBUILD_PRO=ON/g'         build/android/app/build.gradle  
+          sed -i 's/-DBUILD_EDITORS=OFF/-DBUILD_EDITORS=ON/g' build/android/app/build.gradle  
+          echo "=== 验证修改结果 ==="  
+          grep "BUILD_PRO\|BUILD_EDITORS" build/android/app/build.gradle  
+  
+      - name: Build Pro APK  
+        run: |  
+          cd build/android  
+          chmod +x gradlew  
+          ./gradlew assembleRelease  
+          cp app/build/outputs/apk/release/app-release.apk tic80-pro.apk  
+        env:  
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}  
+  
+      - name: Upload artifact  
+        uses: actions/upload-artifact@v4   # 修正：v6 不存在  
+        with:  
+          name: "tic80-android-pro"  
+          path: build/android/tic80-pro.apk
